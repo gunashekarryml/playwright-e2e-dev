@@ -1,5 +1,214 @@
 [
   {
+    "id": "39445418757",
+    "runNumber": 2,
+    "date": "2026-10-20T15:07:25.358Z",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "sha": "5b129a3",
+    "runUrl": "https://github.com/gunashekarryml/playwright-e2e-dev/actions/runs/39445418757",
+    "baseUrl": "",
+    "environment": "PROD",
+    "scope": "smoke",
+    "suite": "Smoke",
+    "filter": "",
+    "total": 12,
+    "passed": 12,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "smoke": {
+      "total": 12,
+      "passed": 12,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0
+    },
+    "severity": {
+      "critical": {
+        "total": 12,
+        "passed": 12,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "high": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "medium": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "low": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      }
+    },
+    "durationMs": 9002.325,
+    "passRate": 100,
+    "features": {
+      "cart": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      },
+      "checkout": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      },
+      "login": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 4,
+          "passed": 4,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      }
+    },
+    "projects": {
+      "chromium": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "firefox": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "mobile-chrome": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "webkit": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      }
+    },
+    "flakyTests": [],
+    "failedTests": [],
+    "causes": {},
+    "tests": [
+      {
+        "title": "adding an item updates the cart badge",
+        "feature": "cart",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            983
+          ],
+          "firefox": [
+            "expected",
+            2487
+          ],
+          "mobile-chrome": [
+            "expected",
+            1068
+          ],
+          "webkit": [
+            "expected",
+            5052
+          ]
+        }
+      },
+      {
+        "title": "completes an order end-to-end with valid details",
+        "feature": "checkout",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            1287
+          ],
+          "firefox": [
+            "expected",
+            2888
+          ],
+          "mobile-chrome": [
+            "expected",
+            1499
+          ],
+          "webkit": [
+            "expected",
+            5763
+          ]
+        }
+      },
+      {
+        "title": "standard user can log in successfully",
+        "feature": "login",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            606
+          ],
+          "firefox": [
+            "expected",
+            884
+          ],
+          "mobile-chrome": [
+            "expected",
+            671
+          ],
+          "webkit": [
+            "expected",
+            1359
+          ]
+        }
+      }
+    ]
+  },
+  {
     "id": "39442490914",
     "runNumber": 1,
     "date": "2026-10-20T14:48:30.720Z",
