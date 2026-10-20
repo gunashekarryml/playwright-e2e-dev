@@ -1,0 +1,173 @@
+[
+  {
+    "id": "39442490914",
+    "runNumber": 1,
+    "date": "2026-10-20T14:48:30.720Z",
+    "event": "workflow_dispatch",
+    "branch": "main",
+    "sha": "658babf",
+    "runUrl": "https://github.com/gunashekarryml/playwright-e2e-dev/actions/runs/39442490914",
+    "baseUrl": "",
+    "environment": "PROD",
+    "scope": "smoke",
+    "suite": "Smoke",
+    "filter": "",
+    "total": 6,
+    "passed": 6,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0,
+    "smoke": {
+      "total": 6,
+      "passed": 6,
+      "failed": 0,
+      "flaky": 0,
+      "skipped": 0
+    },
+    "severity": {
+      "critical": {
+        "total": 6,
+        "passed": 6,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "high": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "medium": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "low": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      }
+    },
+    "durationMs": 4242.76,
+    "passRate": 100,
+    "features": {
+      "cart": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      },
+      "checkout": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      },
+      "login": {
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0,
+        "smoke": {
+          "total": 2,
+          "passed": 2,
+          "failed": 0,
+          "flaky": 0,
+          "skipped": 0
+        }
+      }
+    },
+    "projects": {
+      "chromium": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      },
+      "mobile-chrome": {
+        "total": 3,
+        "passed": 3,
+        "failed": 0,
+        "flaky": 0,
+        "skipped": 0
+      }
+    },
+    "flakyTests": [],
+    "failedTests": [],
+    "causes": {},
+    "tests": [
+      {
+        "title": "adding an item updates the cart badge",
+        "feature": "cart",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            1593
+          ],
+          "mobile-chrome": [
+            "expected",
+            985
+          ]
+        }
+      },
+      {
+        "title": "completes an order end-to-end with valid details",
+        "feature": "checkout",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            1780
+          ],
+          "mobile-chrome": [
+            "expected",
+            1303
+          ]
+        }
+      },
+      {
+        "title": "standard user can log in successfully",
+        "feature": "login",
+        "smoke": true,
+        "severity": "critical",
+        "results": {
+          "chromium": [
+            "expected",
+            567
+          ],
+          "mobile-chrome": [
+            "expected",
+            1098
+          ]
+        }
+      }
+    ]
+  }
+]
