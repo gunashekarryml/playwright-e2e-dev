@@ -1,0 +1,207 @@
+# Thin trigger: no QA code lives in this repo. It checks out the QA repo at a pinned ref and runs its scripts/ci/*.sh.
+name: QA E2E
+
+on:
+  schedule:
+    - cron: '0 3 * * *'   # nightly full regression
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment (URLs from repo variables QA_URL, DEV_URL, STAGING_URL, PROD_URL)'
+        type: choice
+        default: QA
+        options: [QA, DEV, STAGING, PROD]
+      suite:
+        description: 'Keep in sync with scope.sh in the QA repo'
+        type: choice
+        default: Smoke
+        options: [Smoke, Full Regression, Login, Product Listing, Product Details, Cart, Checkout, Menu & Navigation, Dynamic Catalog, Accessibility, User Profiles]
+      base_url:
+        description: 'Advanced: override the environment URL'
+        type: string
+        default: ''
+      grep:
+        description: 'Optional extra tag filter, e.g. @critical'
+        type: string
+        default: ''
+      requested_by:
+        description: 'Set automatically by the Slack /qa-run command'
+        type: string
+        default: ''
+      tests_ref:
+        description: 'Advanced: QA repo ref to run (default: repo variable QA_TESTS_REF)'
+        type: string
+        default: ''
+
+concurrency:
+  group: qa-e2e-${{ github.event_name == 'workflow_dispatch' && github.run_id || 'scheduled' }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  QA_REPO: ${{ vars.QA_REPO }}                                   # e.g. your-org/playwright-e2e
+  QA_REF: ${{ inputs.tests_ref || vars.QA_TESTS_REF || 'main' }}  # pin to a tag in real use
+  ENVIRONMENT: ${{ inputs.environment || 'QA' }}
+  SUITE: ${{ inputs.suite || 'Full Regression' }}
+  GREP_INPUT: ${{ inputs.grep }}
+  BASE_URL_OVERRIDE: ${{ inputs.base_url }}
+  EVENT: ${{ github.event_name }}
+  QA_URL: ${{ vars.QA_URL }}
+  DEV_URL: ${{ vars.DEV_URL }}
+  STAGING_URL: ${{ vars.STAGING_URL }}
+  PROD_URL: ${{ vars.PROD_URL }}
+  SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+  DEMO_FAILURES: ${{ vars.DEMO_FAILURES }}
+
+defaults:
+  run:
+    working-directory: qa
+
+jobs:
+  test:
+    name: Test (${{ matrix.project }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit, mobile-chrome]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ env.QA_REPO }}
+          ref: ${{ env.QA_REF }}
+          token: ${{ secrets.QA_REPO_TOKEN }}
+          path: qa
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: qa/package-lock.json
+      - run: bash scripts/ci/test.sh ${{ matrix.project }}
+      - if: always()
+        uses: daun/playwright-report-summary@v4
+        with:
+          report-file: qa/test-results/results.json
+          job-summary: true
+          comment: false
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ matrix.project }}
+          path: qa/allure-results/
+          retention-days: 14
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: json-results-${{ matrix.project }}
+          path: qa/test-results/results.json
+          if-no-files-found: ignore
+          retention-days: 14
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}
+          path: qa/playwright-report/
+          retention-days: 14
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traces-${{ matrix.project }}
+          path: qa/test-results/
+          retention-days: 7
+
+  report:
+    name: Merge Allure report
+    if: always() && needs.test.result != 'cancelled'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: '${{ env.QA_REPO }}', ref: '${{ env.QA_REF }}', token: '${{ secrets.QA_REPO_TOKEN }}', path: qa }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: qa/package-lock.json }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: allure-results-*
+          path: qa/allure-results
+          merge-multiple: true
+      - run: bash scripts/ci/report.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: qa/allure-report/
+          retention-days: 14
+
+  deploy-pages:
+    name: Publish Allure report + QA dashboard
+    # Only the default branch publishes (a manual run from another branch is for testing only).
+    if: always() && github.ref == format('refs/heads/{0}', github.event.repository.default_branch) && needs.report.result == 'success'
+    needs: [test, report]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-publish    # runs download, extend and re-upload the history file, so they must queue
+      cancel-in-progress: false
+    permissions:
+      contents: write         # history backup on the dashboard-data branch
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: '${{ env.QA_REPO }}', ref: '${{ env.QA_REF }}', token: '${{ secrets.QA_REPO_TOKEN }}', path: qa }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: qa/package-lock.json }
+      - uses: actions/download-artifact@v4
+        with: { name: allure-report, path: qa/allure-run }
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'json-results-*', path: qa/dashboard-input }
+      - uses: actions/cache/restore@v4
+        continue-on-error: true
+        with:
+          path: qa/last-full-report
+          key: allure-full-never-matches-exactly
+          restore-keys: allure-full-
+      - id: site
+        run: bash scripts/ci/site.sh
+        env:
+          HISTORY_REMOTE: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+      - if: steps.site.outputs.scope == 'full'
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: qa/last-full-report
+          key: allure-full-${{ github.run_id }}-${{ github.run_attempt }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: qa/site
+      - id: deployment
+        uses: actions/deploy-pages@v5
+
+  notify-slack:
+    name: Notify Slack
+    if: always() && needs.test.result != 'cancelled'
+    needs: [test, deploy-pages]
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
+      SLACK_RUN_FORM: ${{ vars.SLACK_RUN_FORM }}
+      REQUESTED_BY: ${{ inputs.requested_by }}
+      WORKFLOW_RESULT: ${{ needs.test.result }}
+      QA_WORKFLOW_FILE: qa-trigger.yml
+    steps:
+      - uses: actions/checkout@v4
+        with: { repository: '${{ env.QA_REPO }}', ref: '${{ env.QA_REF }}', token: '${{ secrets.QA_REPO_TOKEN }}', path: qa }
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: qa/package-lock.json }
+      - uses: actions/download-artifact@v4
+        with: { pattern: 'json-results-*', path: qa/dashboard-input }
+      - run: bash scripts/ci/notify.sh
