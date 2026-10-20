@@ -86,7 +86,7 @@ jobs:
         with:
           report-file: qa/test-results/results.json
           job-summary: true
-          comment: false
+          create-comment: false
       - if: always()
         uses: actions/upload-artifact@v4
         with:
