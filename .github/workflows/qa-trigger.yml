@@ -2,8 +2,8 @@
 name: QA E2E
 
 on:
-  schedule:
-    - cron: '0 3 * * *'   # nightly full regression
+  # schedule:
+  #   - cron: '0 3 * * *'   # nightly full regression
   workflow_dispatch:
     inputs:
       environment:
